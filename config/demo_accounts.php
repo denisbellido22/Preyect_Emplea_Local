@@ -8,9 +8,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | Muestra en la pantalla de inicio de sesión un listado con las cuentas de
-    | prueba autorizadas para demos y pruebas académicas. El listado solo
-    | incluye el nombre, el correo y el rol: nunca contraseñas ni hashes, y el
-    | usuario debe escribir la contraseña para autenticarse.
+    | prueba autorizadas para demos y pruebas académicas. Incluye el nombre, el
+    | correo, el rol y la contraseña de demostración para agilizar el ingreso.
+    | Nunca expone contraseñas de cuentas reales ni hashes.
     |
     | Desactivado por defecto: en producción no se muestra nada. Actívalo en el
     | archivo .env local con DEMO_ACCOUNTS_ENABLED=true.
@@ -35,5 +35,11 @@ return [
     | por error.
     */
     'allowed_domain' => 'emplealocal.test',
+
+    /*
+    | Contraseña compartida por las cuentas creadas en UserSeeder. Solo se
+    | muestra en el login cuando `enabled` está activo y fuera de producción.
+    */
+    'password' => 'password123',
 
 ];

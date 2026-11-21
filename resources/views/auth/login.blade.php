@@ -50,17 +50,23 @@
                             <i class="bi bi-lightning-charge text-brand me-1"></i>{{ __('Acceso rápido a cuentas de prueba') }}
                         </h6>
                         <p class="small text-muted mb-2">
-                            {{ __('Solo para pruebas y demostraciones. Elige una cuenta para completar el correo: deberás escribir su contraseña para ingresar.') }}
+                            {{ __('Solo para pruebas y demostraciones. Pulsa una cuenta para completar el correo y la contraseña; después pulsa Ingresar.') }}
                         </p>
 
                         <div class="list-group list-group-flush">
                             @foreach($cuentasDemo as $cuenta)
                                 <button type="button"
                                         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0 btn-cuenta-demo"
-                                        data-email="{{ $cuenta->email }}">
-                                    <span>
+                                        data-email="{{ $cuenta->email }}"
+                                        data-password="{{ $demoPassword }}">
+                                    <span class="text-start">
                                         <span class="fw-semibold d-block">{{ $cuenta->name }}</span>
-                                        <span class="text-muted small">{{ $cuenta->email }}</span>
+                                        <span class="text-muted small d-block">{{ $cuenta->email }}</span>
+                                        @if($demoPassword)
+                                            <span class="text-muted small d-block">
+                                                {{ __('Contraseña') }}: <code>{{ $demoPassword }}</code>
+                                            </span>
+                                        @endif
                                     </span>
                                     <span class="badge bg-brand">{{ __('role.'.$cuenta->role) }}</span>
                                 </button>
@@ -73,7 +79,8 @@
                     document.querySelectorAll('.btn-cuenta-demo').forEach(function (boton) {
                         boton.addEventListener('click', function () {
                             document.getElementById('email').value = boton.dataset.email;
-                            document.getElementById('password').focus();
+                            document.getElementById('password').value = boton.dataset.password;
+                            document.querySelector('form button[type="submit"]').focus();
                         });
                     });
                 </script>

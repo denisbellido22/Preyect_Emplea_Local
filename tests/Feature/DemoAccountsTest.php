@@ -26,11 +26,12 @@ class DemoAccountsTest extends TestCase
 
         $this->get(route('login'))
             ->assertOk()
-            ->assertDontSee('Acceso rápido a cuentas de prueba');
+            ->assertDontSee('Acceso rápido a cuentas de prueba')
+            ->assertDontSee('password123');
     }
 
-    /** Con la opción activa muestra nombre, correo y rol, pero nunca la contraseña */
-    public function test_muestra_nombre_correo_y_rol_sin_contrasenas(): void
+    /** Con la opción activa muestra nombre, correo, rol y la contraseña de demostración */
+    public function test_muestra_nombre_correo_rol_y_contrasena_de_demostracion(): void
     {
         config(['demo_accounts.enabled' => true]);
         $this->crearCuentasDePrueba();
@@ -47,22 +48,25 @@ class DemoAccountsTest extends TestCase
             ->assertSee('empleador@emplealocal.test')
             ->assertSee('postulante@emplealocal.test')
             ->assertSee('data-email="admin@emplealocal.test"', false)
+            ->assertSee('data-password="password123"', false)
             ->assertSee('Administrador')
             ->assertSee('Empleador')
             ->assertSee('Postulante')
+            // La contraseña de demostración es visible para agilizar el ingreso.
+            ->assertSee('password123')
             // Las cuentas reales nunca aparecen en el listado.
             ->assertDontSee('Persona Real')
             ->assertDontSee('persona@gmail.com')
-            // Y nunca se filtra la contraseña ni su hash.
-            ->assertDontSee('password123')
+            // Nunca se filtra ningún hash almacenado.
             ->assertDontSee('$2y$');
 
-        // Las cuentas enviadas a la vista no incluyen la contraseña.
+        // Las cuentas enviadas a la vista no incluyen la columna password.
         $cuentas = $response->viewData('cuentasDemo');
 
         $this->assertCount(3, $cuentas);
         $this->assertSame(['admin', 'empleador', 'postulante'], $cuentas->pluck('role')->all());
         $this->assertArrayNotHasKey('password', $cuentas->first()->getAttributes());
+        $this->assertSame('password123', $response->viewData('demoPassword'));
     }
 
     /** Solo se listan las cuentas de prueba autorizadas que existen */
@@ -100,6 +104,7 @@ class DemoAccountsTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertDontSee('Acceso rápido a cuentas de prueba')
-            ->assertDontSee('admin@emplealocal.test');
+            ->assertDontSee('admin@emplealocal.test')
+            ->assertDontSee('password123');
     }
 }

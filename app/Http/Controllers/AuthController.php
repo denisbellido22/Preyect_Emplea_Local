@@ -75,15 +75,20 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        return view('auth.login', ['cuentasDemo' => $this->cuentasDemo()]);
+        $cuentasDemo = $this->cuentasDemo();
+
+        return view('auth.login', [
+            'cuentasDemo' => $cuentasDemo,
+            'demoPassword' => $cuentasDemo->isNotEmpty() ? config('demo_accounts.password') : null,
+        ]);
     }
 
     /**
      * Cuentas de prueba autorizadas para el acceso rápido del login.
      *
      * Solo se activan en desarrollo (config/demo_accounts.php) y únicamente se
-     * exponen nombre, correo y rol: nunca contraseñas ni hashes, y nunca
-     * cuentas reales ajenas al dominio de pruebas. En producción devuelve una
+     * exponen nombre, correo, rol y la contraseña de demostración: nunca hashes
+     * ni cuentas reales ajenas al dominio de pruebas. En producción devuelve una
      * colección vacía y la sección no se muestra.
      */
     private function cuentasDemo(): Collection
