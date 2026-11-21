@@ -16,7 +16,7 @@ class PostulacionController extends Controller
         $user = $request->user();
 
         if ($oferta->estado !== Oferta::ESTADO_APROBADO) {
-            return back()->with('error', 'Sólo puedes postular a ofertas aprobadas.');
+            return back()->with('error', __('Sólo puedes postular a ofertas aprobadas.'));
         }
 
         // RF10: validación a nivel de aplicación
@@ -25,7 +25,7 @@ class PostulacionController extends Controller
             ->exists();
 
         if ($existe) {
-            return back()->with('error', 'Ya te postulaste a esta oferta. No se permiten postulaciones duplicadas.');
+            return back()->with('error', __('Ya te postulaste a esta oferta. No se permiten postulaciones duplicadas.'));
         }
 
         $data = $request->validate([
@@ -41,11 +41,11 @@ class PostulacionController extends Controller
             ]);
         } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
             // RF10: restricción de base de datos como segunda barrera
-            return back()->with('error', 'Ya te postulaste a esta oferta. No se permiten postulaciones duplicadas.');
+            return back()->with('error', __('Ya te postulaste a esta oferta. No se permiten postulaciones duplicadas.'));
         }
 
         return redirect()->route('postulaciones.index')
-            ->with('success', 'Postulación enviada correctamente. Estado inicial: Pendiente.');
+            ->with('success', __('Postulación enviada correctamente. Estado inicial: :estado.', ['estado' => __('status.pendiente')]));
     }
 
     /**
@@ -87,7 +87,7 @@ class PostulacionController extends Controller
         abort_unless(
             $user->isAdmin() || $postulacion->oferta->user_id === $user->id,
             403,
-            'No puedes gestionar postulaciones de ofertas de otro empleador.'
+            __('No puedes gestionar postulaciones de ofertas de otro empleador.')
         );
 
         $data = $request->validate([
@@ -96,6 +96,6 @@ class PostulacionController extends Controller
 
         $postulacion->update(['estado' => $data['estado']]);
 
-        return back()->with('success', 'Estado de la postulación actualizado a '.ucfirst($data['estado']).'.');
+        return back()->with('success', __('Estado de la postulación actualizado a :estado.', ['estado' => __('status.'.$data['estado'])]));
     }
 }

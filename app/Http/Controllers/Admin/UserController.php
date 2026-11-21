@@ -50,13 +50,13 @@ class UserController extends Controller
 
         // Evita que el administrador se quite a sí mismo el acceso.
         if ($usuario->id === $request->user()->id && $data['role'] !== User::ROLE_ADMIN) {
-            return back()->with('error', 'No puedes cambiar tu propio rol de administrador.');
+            return back()->with('error', __('No puedes cambiar tu propio rol de administrador.'));
         }
 
         $usuario->update($data);
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', 'Usuario actualizado correctamente.');
+            ->with('success', __('Usuario actualizado correctamente.'));
     }
 
     /**
@@ -65,12 +65,12 @@ class UserController extends Controller
     public function destroy(Request $request, User $usuario)
     {
         if ($usuario->id === $request->user()->id) {
-            return back()->with('error', 'No puedes eliminar tu propia cuenta de administrador.');
+            return back()->with('error', __('No puedes eliminar tu propia cuenta de administrador.'));
         }
 
         $usuario->delete();
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', 'Usuario eliminado correctamente.');
+            ->with('success', __('Usuario eliminado correctamente.'));
     }
 }

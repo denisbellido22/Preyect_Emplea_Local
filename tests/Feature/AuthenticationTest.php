@@ -22,11 +22,14 @@ class AuthenticationTest extends TestCase
             'telefono' => '999888777',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        // El registro deja la cuenta pendiente de verificación (RF21).
+        $response->assertRedirect(route('verification.notice'));
+        $response->assertSessionHas('success');
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [
             'email' => 'empleador.demo@example.com',
             'role' => 'empleador',
+            'email_verified_at' => null,
         ]);
     }
 
@@ -41,11 +44,13 @@ class AuthenticationTest extends TestCase
             'role' => 'postulante',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('verification.notice'));
+        $response->assertSessionHas('success');
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [
             'email' => 'postulante.demo@example.com',
             'role' => 'postulante',
+            'email_verified_at' => null,
         ]);
     }
 

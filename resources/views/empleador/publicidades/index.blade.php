@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Mi publicidad')
+@section('title', __('Mi publicidad'))
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0"><i class="bi bi-megaphone text-brand me-1"></i>Mis solicitudes de publicidad</h4>
-        <a href="{{ route('empleador.publicidades.create') }}" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg me-1"></i>Nueva solicitud</a>
+        <h4 class="mb-0"><i class="bi bi-megaphone text-brand me-1"></i>{{ __('Mis solicitudes de publicidad') }}</h4>
+        <a href="{{ route('empleador.publicidades.create') }}" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg me-1"></i>{{ __('Nueva solicitud') }}</a>
     </div>
 
     <div class="row g-3">
@@ -18,7 +18,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <h6 class="card-title mb-1">{{ $pub->titulo }}</h6>
-                            <span class="badge badge-soft-{{ $pub->estado }}">{{ ucfirst($pub->estado) }}</span>
+                            <span class="badge badge-soft-{{ $pub->estado }}">{{ __('status.'.$pub->estado) }}</span>
                         </div>
                         <p class="text-muted small mb-2">{{ \Illuminate\Support\Str::limit($pub->descripcion, 100) }}</p>
                         <p class="small mb-0 text-muted">
@@ -30,7 +30,7 @@
             </div>
         @empty
             <div class="col-12">
-                <div class="alert alert-info">Aún no has registrado solicitudes de publicidad.</div>
+                <div class="alert alert-info">{{ __('Aún no has registrado solicitudes de publicidad.') }}</div>
             </div>
         @endforelse
     </div>

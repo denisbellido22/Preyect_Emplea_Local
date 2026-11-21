@@ -46,6 +46,6 @@ class PublicidadController extends Controller
         Publicidad::create($data);
 
         return redirect()->route('empleador.publicidades.index')
-            ->with('success', 'Solicitud de publicidad enviada. Quedará pendiente hasta la aprobación del administrador.');
+            ->with('success', __('Solicitud de publicidad enviada. Quedará pendiente hasta la aprobación del administrador.'));
     }
 }

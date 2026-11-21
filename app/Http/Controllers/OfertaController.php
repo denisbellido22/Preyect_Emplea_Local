@@ -81,7 +81,7 @@ class OfertaController extends Controller
         Oferta::create($data);
 
         return redirect()->route('empleador.ofertas.index')
-            ->with('success', 'Oferta registrada. Quedará visible cuando el administrador la apruebe.');
+            ->with('success', __('Oferta registrada. Quedará visible cuando el administrador la apruebe.'));
     }
 
     /**
@@ -108,7 +108,7 @@ class OfertaController extends Controller
         $oferta->update($data);
 
         return redirect()->route('empleador.ofertas.index')
-            ->with('success', 'Oferta actualizada. Será revisada nuevamente por el administrador.');
+            ->with('success', __('Oferta actualizada. Será revisada nuevamente por el administrador.'));
     }
 
     /**
@@ -121,7 +121,7 @@ class OfertaController extends Controller
         $oferta->delete();
 
         return redirect()->route('empleador.ofertas.index')
-            ->with('success', 'Oferta eliminada correctamente.');
+            ->with('success', __('Oferta eliminada correctamente.'));
     }
 
     /**
@@ -147,6 +147,6 @@ class OfertaController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user->isAdmin() || $oferta->user_id === $user->id, 403, 'No puedes gestionar ofertas de otro empleador.');
+        abort_unless($user->isAdmin() || $oferta->user_id === $user->id, 403, __('No puedes gestionar ofertas de otro empleador.'));
     }
 }

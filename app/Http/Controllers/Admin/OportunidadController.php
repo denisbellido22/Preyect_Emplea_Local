@@ -45,7 +45,7 @@ class OportunidadController extends Controller
         Oportunidad::create($data);
 
         return redirect()->route('admin.oportunidades.index')
-            ->with('success', 'Oportunidad creada correctamente.');
+            ->with('success', __('Oportunidad creada correctamente.'));
     }
 
     /**
@@ -73,7 +73,7 @@ class OportunidadController extends Controller
         $oportunidad->update($data);
 
         return redirect()->route('admin.oportunidades.index')
-            ->with('success', 'Oportunidad actualizada correctamente.');
+            ->with('success', __('Oportunidad actualizada correctamente.'));
     }
 
     /**
@@ -85,7 +85,7 @@ class OportunidadController extends Controller
         $oportunidad->delete();
 
         return redirect()->route('admin.oportunidades.index')
-            ->with('success', 'Oportunidad eliminada correctamente.');
+            ->with('success', __('Oportunidad eliminada correctamente.'));
     }
 
     /**

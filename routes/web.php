@@ -6,7 +6,9 @@ use App\Http\Controllers\Admin\PublicidadController as AdminPublicidadController
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\OportunidadController;
 use App\Http\Controllers\PostulacionController;
@@ -21,9 +23,17 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Cambio de idioma de la interfaz (español / inglés). Disponible para
+// autenticados y visitantes; el idioma se guarda en sesión y en una cookie.
+Route::post('/idioma/{locale}', [LocaleController::class, 'update'])->name('locale.update');
+
 // RF07 / RF08: búsqueda y detalle de ofertas (accesibles a todos)
 Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
 Route::get('/ofertas/{oferta}', [OfertaController::class, 'show'])->name('ofertas.show');
+
+// RF15: las oportunidades publicadas también son visibles para visitantes.
+Route::get('/oportunidades', [OportunidadController::class, 'index'])->name('oportunidades.index');
+Route::get('/oportunidades/{oportunidad}', [OportunidadController::class, 'show'])->name('oportunidades.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -35,11 +45,33 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // RF02: recuperación de contraseña por correo electrónico
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.store');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| Verificación de correo electrónico
+|--------------------------------------------------------------------------
+| Rutas nativas de Laravel protegidas con el middleware "signed": el enlace
+| incluye la firma, el id del usuario y el hash de su correo, de modo que no
+| se puede verificar una cuenta manipulando la URL.
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::post('/email/verify/resend', [EmailVerificationController::class, 'send'])->name('verification.send');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -54,9 +86,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil/editar', [ProfileController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
 
-    // RF15: consulta de oportunidades
-    Route::get('/oportunidades', [OportunidadController::class, 'index'])->name('oportunidades.index');
-    Route::get('/oportunidades/{oportunidad}', [OportunidadController::class, 'show'])->name('oportunidades.show');
+    // RF03: cambio de contraseña (disponible para todos los roles)
+    Route::get('/perfil/password', [ProfileController::class, 'editPassword'])->name('perfil.password.edit');
+    Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('perfil.password.update');
+
+    // RF03: eliminación de la propia cuenta (requiere contraseña actual)
+    Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
+
 
     /*
     |----------------------------------------------------------------------
@@ -65,18 +101,19 @@ Route::middleware('auth')->group(function () {
     */
     Route::middleware('role:empleador')->prefix('empleador')->name('empleador.')->group(function () {
         Route::get('/ofertas', [OfertaController::class, 'misOfertas'])->name('ofertas.index');
-        Route::get('/ofertas/crear', [OfertaController::class, 'create'])->name('ofertas.create');
-        Route::post('/ofertas', [OfertaController::class, 'store'])->name('ofertas.store');
-        Route::get('/ofertas/{oferta}/editar', [OfertaController::class, 'edit'])->name('ofertas.edit');
-        Route::put('/ofertas/{oferta}', [OfertaController::class, 'update'])->name('ofertas.update');
-        Route::delete('/ofertas/{oferta}', [OfertaController::class, 'destroy'])->name('ofertas.destroy');
+        // Publicar o modificar ofertas exige un correo verificado.
+        Route::get('/ofertas/crear', [OfertaController::class, 'create'])->middleware('verified')->name('ofertas.create');
+        Route::post('/ofertas', [OfertaController::class, 'store'])->middleware('verified')->name('ofertas.store');
+        Route::get('/ofertas/{oferta}/editar', [OfertaController::class, 'edit'])->middleware('verified')->name('ofertas.edit');
+        Route::put('/ofertas/{oferta}', [OfertaController::class, 'update'])->middleware('verified')->name('ofertas.update');
+        Route::delete('/ofertas/{oferta}', [OfertaController::class, 'destroy'])->middleware('verified')->name('ofertas.destroy');
 
         Route::get('/postulantes', [PostulacionController::class, 'postulantes'])->name('postulantes.index');
         Route::put('/postulaciones/{postulacion}/estado', [PostulacionController::class, 'actualizarEstado'])->name('postulaciones.estado');
 
         Route::get('/publicidades', [PublicidadController::class, 'index'])->name('publicidades.index');
-        Route::get('/publicidades/crear', [PublicidadController::class, 'create'])->name('publicidades.create');
-        Route::post('/publicidades', [PublicidadController::class, 'store'])->name('publicidades.store');
+        Route::get('/publicidades/crear', [PublicidadController::class, 'create'])->middleware('verified')->name('publicidades.create');
+        Route::post('/publicidades', [PublicidadController::class, 'store'])->middleware('verified')->name('publicidades.store');
     });
 
     /*
@@ -85,7 +122,10 @@ Route::middleware('auth')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:postulante')->group(function () {
-        Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])->name('postulaciones.store');
+        // Postularse envía datos personales al empleador: exige correo verificado.
+        Route::post('/ofertas/{oferta}/postular', [PostulacionController::class, 'store'])
+            ->middleware('verified')
+            ->name('postulaciones.store');
         Route::get('/mis-postulaciones', [PostulacionController::class, 'index'])->name('postulaciones.index');
     });
 

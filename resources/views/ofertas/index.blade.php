@@ -1,35 +1,35 @@
 @extends('layouts.app')
 
-@section('title', 'Ofertas laborales')
+@section('title', __('Ofertas laborales'))
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0"><i class="bi bi-briefcase text-brand me-1"></i>Ofertas laborales</h4>
-        <span class="text-muted small">{{ $ofertas->total() }} resultado(s)</span>
+        <h4 class="mb-0"><i class="bi bi-briefcase text-brand me-1"></i>{{ __('Ofertas laborales') }}</h4>
+        <span class="text-muted small">{{ __(':count resultado(s)', ['count' => $ofertas->total()]) }}</span>
     </div>
 
     <form action="{{ route('ofertas.index') }}" method="GET" class="card card-body mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-9">
-                <label for="q" class="form-label small text-muted mb-1">Buscar por título, ubicación o tipo de trabajo</label>
+                <label for="q" class="form-label small text-muted mb-1">{{ __('Buscar por título, ubicación o tipo de trabajo') }}</label>
                 <input type="text" name="q" id="q" value="{{ $termino }}" class="form-control"
-                       placeholder="Ej.: albañil, Coracora, tiempo completo...">
+                       placeholder="{{ __('Ej.: albañil, Coracora, tiempo completo...') }}">
             </div>
             <div class="col-md-3 d-grid">
-                <button type="submit" class="btn btn-brand"><i class="bi bi-search me-1"></i>Buscar</button>
+                <button type="submit" class="btn btn-brand"><i class="bi bi-search me-1"></i>{{ __('Buscar') }}</button>
             </div>
         </div>
         @if($termino)
             <div class="mt-2">
-                <a href="{{ route('ofertas.index') }}" class="small text-decoration-none">Limpiar búsqueda</a>
+                <a href="{{ route('ofertas.index') }}" class="small text-decoration-none">{{ __('Limpiar búsqueda') }}</a>
             </div>
         @endif
     </form>
 
     @if($ofertas->isEmpty())
         <div class="alert alert-info">
-            No se encontraron ofertas aprobadas
-            @if($termino) para el término «{{ $termino }}» @endif.
+            {{ __('No se encontraron ofertas aprobadas') }}
+            @if($termino) {{ __('para el término «:termino»', ['termino' => $termino]) }} @endif.
         </div>
     @else
         <div class="row g-3">
@@ -43,16 +43,16 @@
                             </p>
                             <p class="text-muted small mb-2">
                                 <i class="bi bi-geo-alt"></i> {{ $oferta->lugar }}
-                                &nbsp;·&nbsp; <i class="bi bi-clock"></i> {{ $oferta->tipo_trabajo }}
+                                &nbsp;·&nbsp; <i class="bi bi-clock"></i> {{ __('job_type.'.$oferta->tipo_trabajo) }}
                             </p>
                             <p class="card-text flex-grow-1">{{ \Illuminate\Support\Str::limit($oferta->descripcion, 120) }}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 @if($oferta->salario)
                                     <span class="fw-semibold text-brand">S/ {{ number_format($oferta->salario, 2) }}</span>
                                 @else
-                                    <span class="text-muted small">Salario a convenir</span>
+                                    <span class="text-muted small">{{ __('Salario a convenir') }}</span>
                                 @endif
-                                <a href="{{ route('ofertas.show', $oferta) }}" class="btn btn-brand btn-sm">Ver detalle</a>
+                                <a href="{{ route('ofertas.show', $oferta) }}" class="btn btn-brand btn-sm">{{ __('Ver detalle') }}</a>
                             </div>
                         </div>
                     </div>

@@ -1,22 +1,22 @@
 @extends('layouts.app')
 
-@section('title', 'Postulantes')
+@section('title', __('Postulantes'))
 
 @section('content')
-    <h4 class="mb-3"><i class="bi bi-people text-brand me-1"></i>Postulantes a mis ofertas</h4>
+    <h4 class="mb-3"><i class="bi bi-people text-brand me-1"></i>{{ __('Postulantes a mis ofertas') }}</h4>
 
     <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Postulante</th>
-                        <th>Correo</th>
-                        <th>Teléfono</th>
-                        <th>Oferta</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
-                        <th class="text-end">Actualizar estado</th>
+                        <th>{{ __('Postulante') }}</th>
+                        <th>{{ __('Correo') }}</th>
+                        <th>{{ __('Teléfono') }}</th>
+                        <th>{{ __('Oferta') }}</th>
+                        <th>{{ __('Fecha') }}</th>
+                        <th>{{ __('Estado') }}</th>
+                        <th class="text-end">{{ __('Actualizar estado') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,22 +32,22 @@
                         <td class="small">{{ $p->postulante?->telefono ?: '—' }}</td>
                         <td class="small">{{ $p->oferta?->titulo }}</td>
                         <td class="small">{{ $p->created_at->format('d/m/Y') }}</td>
-                        <td><span class="badge badge-soft-{{ $p->estado }}">{{ ucfirst($p->estado) }}</span></td>
+                        <td><span class="badge badge-soft-{{ $p->estado }}">{{ __('status.'.$p->estado) }}</span></td>
                         <td class="text-end">
                             <form action="{{ route('empleador.postulaciones.estado', $p) }}" method="POST" class="d-flex gap-1 justify-content-end">
                                 @csrf
                                 @method('PUT')
                                 <select name="estado" class="form-select form-select-sm" style="width: auto;">
                                     @foreach(['pendiente', 'revisada', 'aceptada', 'rechazada'] as $estado)
-                                        <option value="{{ $estado }}" {{ $p->estado === $estado ? 'selected' : '' }}>{{ ucfirst($estado) }}</option>
+                                        <option value="{{ $estado }}" {{ $p->estado === $estado ? 'selected' : '' }}>{{ __('status.'.$estado) }}</option>
                                     @endforeach
                                 </select>
-                                <button type="submit" class="btn btn-sm btn-brand">Guardar</button>
+                                <button type="submit" class="btn btn-sm btn-brand">{{ __('Guardar') }}</button>
                             </form>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">No hay postulaciones en tus ofertas.</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted py-4">{{ __('No hay postulaciones en tus ofertas.') }}</td></tr>
                 @endforelse
                 </tbody>
             </table>

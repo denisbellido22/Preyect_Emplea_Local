@@ -22,6 +22,9 @@ class Oportunidad extends Model
         'curso',
         'evento',
         'otra',
+        'convocatoria',
+        'examen',
+        'practica',
     ];
 
     protected $table = 'oportunidades';

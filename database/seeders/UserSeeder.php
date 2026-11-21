@@ -56,5 +56,16 @@ class UserSeeder extends Seeder
                 'descripcion' => 'Profesional responsable, con disponibilidad para trabajar en la zona.',
             ]
         );
+
+        // Las cuentas de demostración usan correos @emplealocal.test que no
+        // reciben mensajes reales: se marcan como verificadas para que el
+        // docente pueda probar todos los roles sin depender del correo.
+        User::whereIn('email', [
+            'admin@emplealocal.test',
+            'empleador@emplealocal.test',
+            'postulante@emplealocal.test',
+        ])->whereNull('email_verified_at')->get()->each(
+            fn (User $user) => $user->forceFill(['email_verified_at' => now()])->save()
+        );
     }
 }

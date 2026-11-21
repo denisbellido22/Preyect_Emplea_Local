@@ -22,11 +22,11 @@ class RoleMiddleware
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->route('login')->with('error', 'Debes iniciar sesión para continuar.');
+            return redirect()->route('login')->with('error', __('Debes iniciar sesión para continuar.'));
         }
 
         if (! in_array($user->role, $roles, true)) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+            abort(403, __('No tienes permiso para acceder a esta sección.'));
         }
 
         return $next($request);

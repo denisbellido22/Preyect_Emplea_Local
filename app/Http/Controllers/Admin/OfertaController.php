@@ -34,7 +34,7 @@ class OfertaController extends Controller
     {
         $oferta->update(['estado' => Oferta::ESTADO_APROBADO]);
 
-        return back()->with('success', 'Oferta aprobada y publicada.');
+        return back()->with('success', __('Oferta aprobada y publicada.'));
     }
 
     /**
@@ -44,7 +44,7 @@ class OfertaController extends Controller
     {
         $oferta->update(['estado' => Oferta::ESTADO_RECHAZADO]);
 
-        return back()->with('success', 'Oferta rechazada.');
+        return back()->with('success', __('Oferta rechazada.'));
     }
 
     /**
@@ -74,7 +74,7 @@ class OfertaController extends Controller
         $oferta->update($data);
 
         return redirect()->route('admin.ofertas.index')
-            ->with('success', 'Oferta actualizada correctamente.');
+            ->with('success', __('Oferta actualizada correctamente.'));
     }
 
     /**
@@ -84,6 +84,6 @@ class OfertaController extends Controller
     {
         $oferta->delete();
 
-        return back()->with('success', 'Oferta eliminada correctamente.');
+        return back()->with('success', __('Oferta eliminada correctamente.'));
     }
 }

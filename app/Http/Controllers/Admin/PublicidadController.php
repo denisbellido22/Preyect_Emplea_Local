@@ -37,7 +37,7 @@ class PublicidadController extends Controller
     {
         $publicidad->update(['estado' => Publicidad::ESTADO_APROBADO]);
 
-        return back()->with('success', 'Publicidad aprobada.');
+        return back()->with('success', __('Publicidad aprobada.'));
     }
 
     /**
@@ -47,7 +47,7 @@ class PublicidadController extends Controller
     {
         $publicidad->update(['estado' => Publicidad::ESTADO_RECHAZADO]);
 
-        return back()->with('success', 'Publicidad rechazada.');
+        return back()->with('success', __('Publicidad rechazada.'));
     }
 
     /**
@@ -57,6 +57,6 @@ class PublicidadController extends Controller
     {
         $publicidad->update(['estado' => Publicidad::ESTADO_FINALIZADO]);
 
-        return back()->with('success', 'Publicidad finalizada.');
+        return back()->with('success', __('Publicidad finalizada.'));
     }
 }

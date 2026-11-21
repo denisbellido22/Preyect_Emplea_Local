@@ -52,7 +52,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Panel del empleador: sus ofertas, postulaciones recibidas y publicidad.
+     * Panel de Empleador: sus ofertas, postulaciones recibidas y publicidad.
      */
     private function empleador(User $user)
     {
@@ -77,7 +77,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Panel del postulante: sus postulaciones y ofertas disponibles.
+     * Panel del Postulante: sus postulaciones y ofertas disponibles.
      */
     private function postulante(User $user)
     {

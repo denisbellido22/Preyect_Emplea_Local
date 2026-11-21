@@ -82,6 +82,22 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'es'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Idiomas disponibles en la interfaz
+    |--------------------------------------------------------------------------
+    |
+    | El primer idioma es el predeterminado. El selector del encabezado y el
+    | middleware SetLocale sólo aceptan los códigos listados aquí.
+    |
+    */
+
+    'supported_locales' => [
+        'es' => 'Español',
+        'en' => 'English',
+        'pt' => 'Português',
+    ],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'es_PE'),
 
     /*
