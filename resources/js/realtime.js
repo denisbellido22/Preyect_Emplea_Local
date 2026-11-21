@@ -27,6 +27,7 @@ function iniciarTiempoReal(seccion) {
     const mensajeVacio = seccion.querySelector('#oportunidades-vacio');
     const aviso = seccion.querySelector('#realtime-aviso');
     const indicador = seccion.querySelector('#realtime-indicador');
+    const textoIndicador = indicador?.querySelector('.live-text') || indicador;
     const notificaciones = seccion.querySelector('#realtime-notificaciones');
     const contador = seccion.querySelector('#oportunidades-contador');
 
@@ -278,7 +279,7 @@ function iniciarTiempoReal(seccion) {
             aviso.hidden = true;
             indicador.hidden = false;
             indicador.dataset.estado = 'conectado';
-            indicador.textContent = 'En vivo';
+            textoIndicador.textContent = 'En vivo';
 
             return;
         }
@@ -287,7 +288,7 @@ function iniciarTiempoReal(seccion) {
         aviso.hidden = false;
         indicador.hidden = false;
         indicador.dataset.estado = 'desconectado';
-        indicador.textContent = 'Reconectando';
+        textoIndicador.textContent = 'Reconectando';
     };
 
     if (botonVerTodas) {
