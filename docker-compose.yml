@@ -1,0 +1,140 @@
+# Emplea Local · Docker Compose
+#
+# Servicios:
+#   app     -> PHP-FPM 8.3 + Laravel 12 (ejecuta migraciones seguras)
+#   nginx   -> servidor web público (puerto 8000) y archivos estáticos
+#   reverb  -> servidor WebSocket Laravel Reverb (puerto 8080)
+#   queue   -> worker de colas sobre la tabla jobs
+#
+# No se agrega MySQL/MariaDB porque el proyecto usa SQLite: la base vive en
+# ./database/database.sqlite y se conserva mediante un bind mount.
+# No se agrega Redis porque cache, sesiones y colas usan el driver database.
+
+name: emplea-local
+
+x-build: &build
+  context: .
+  args:
+    # Dirección PÚBLICA del WebSocket para el navegador (no "reverb").
+    VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:-emplea-local-key}
+    VITE_REVERB_HOST: ${DOCKER_REVERB_HOST:-localhost}
+    VITE_REVERB_PORT: ${DOCKER_REVERB_PORT:-8080}
+    VITE_REVERB_SCHEME: ${DOCKER_REVERB_SCHEME:-http}
+
+x-app-environment: &app-environment
+  APP_ENV: ${DOCKER_APP_ENV:-local}
+  APP_DEBUG: ${DOCKER_APP_DEBUG:-true}
+  APP_URL: ${DOCKER_APP_URL:-http://localhost:8000}
+  ASSET_URL: ${DOCKER_APP_URL:-http://localhost:8000}
+  DB_CONNECTION: sqlite
+  DB_DATABASE: /var/www/html/database/database.sqlite
+  SESSION_DRIVER: database
+  CACHE_STORE: database
+  QUEUE_CONNECTION: database
+  BROADCAST_CONNECTION: reverb
+  # Dirección INTERNA del contenedor Reverb para que Laravel publique eventos.
+  REVERB_HOST: reverb
+  REVERB_PORT: 8080
+  REVERB_SCHEME: http
+  # Dirección en la que Reverb escucha dentro de su propio contenedor.
+  REVERB_SERVER_HOST: 0.0.0.0
+  REVERB_SERVER_PORT: 8080
+  LOG_CHANNEL: stderr
+  RUN_MIGRATIONS: "false"
+  SANCTUM_STATEFUL_DOMAINS: ${DOCKER_SANCTUM_DOMAINS:-localhost:8000,127.0.0.1:8000}
+
+services:
+  app:
+    build: *build
+    image: emplea-local-app:latest
+    restart: unless-stopped
+    environment:
+      <<: *app-environment
+      RUN_MIGRATIONS: "true"
+      # En una base nueva crea usuarios y publicaciones de demostración.
+      SEED_ON_FIRST_RUN: "${DOCKER_SEED_ON_FIRST_RUN:-true}"
+    volumes:
+      - ./.env:/var/www/html/.env
+      - ./database:/var/www/html/database
+      - emplea-storage:/var/www/html/storage
+      - emplea-uploads:/var/www/html/public/uploads
+    expose:
+      - "9000"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    networks:
+      - emplea
+
+  nginx:
+    build: *build
+    image: emplea-local-app:latest
+    restart: unless-stopped
+    entrypoint: ["nginx", "-g", "daemon off;"]
+    ports:
+      - "${DOCKER_HTTP_PORT:-8000}:80"
+    volumes:
+      - emplea-uploads:/var/www/html/public/uploads:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/up"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - emplea
+
+  reverb:
+    build: *build
+    image: emplea-local-app:latest
+    restart: unless-stopped
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    environment: *app-environment
+    volumes:
+      - ./.env:/var/www/html/.env
+      - ./database:/var/www/html/database
+      - emplea-storage:/var/www/html/storage
+    ports:
+      - "${DOCKER_REVERB_PORT:-8080}:8080"
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 8080) ? 0 : 1);"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - emplea
+
+  queue:
+    build: *build
+    image: emplea-local-app:latest
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    environment: *app-environment
+    volumes:
+      - ./.env:/var/www/html/.env
+      - ./database:/var/www/html/database
+      - emplea-storage:/var/www/html/storage
+      - emplea-uploads:/var/www/html/public/uploads
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - emplea
+
+volumes:
+  emplea-storage:
+  emplea-uploads:
+
+networks:
+  emplea:
+    driver: bridge

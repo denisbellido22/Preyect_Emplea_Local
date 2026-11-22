@@ -1,2 +1,6 @@
-# La base de datos SQLite forma parte del proyecto (RF: base de datos local).
-# No se ignora para que el sistema funcione al copiar la carpeta.
+# La base SQLite se genera localmente y NO se versiona para no publicar
+# datos de usuarios. Crearla con:
+#   php artisan migrate --seed
+# Con Docker se crea, migra y siembra automáticamente al arrancar con una
+# base nueva (ver docker/entrypoint.sh).
+database.sqlite

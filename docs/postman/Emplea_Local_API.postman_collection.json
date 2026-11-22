@@ -1,0 +1,360 @@
+{
+  "info": {
+    "name": "Emplea Local · API REST",
+    "description": "Colección de pruebas de la API REST de Emplea Local (Laravel 12 + Sanctum). Ejecuta primero un Login: el token se guarda automáticamente en la variable {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" },
+    { "key": "oferta_id", "value": "1" },
+    { "key": "oportunidad_id", "value": "1" },
+    { "key": "postulacion_id", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1. Autenticación",
+      "item": [
+        {
+          "name": "Registro postulante",
+          "auth": { "type": "noauth" },
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana.torres@emplealocal.test\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"postulante\",\n  \"telefono\": \"999888777\",\n  \"distrito\": \"Puquio\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login empleador",
+          "auth": { "type": "noauth" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login correcto', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.token) { pm.collectionVariables.set('token', body.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"empleador@emplealocal.test\",\n  \"password\": \"password123\",\n  \"device_name\": \"postman\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login postulante",
+          "auth": { "type": "noauth" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.token) { pm.collectionVariables.set('token', body.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"postulante@emplealocal.test\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login administrador",
+          "auth": { "type": "noauth" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.token) { pm.collectionVariables.set('token', body.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@emplealocal.test\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mi perfil",
+          "request": { "method": "GET", "url": "{{base_url}}/api/auth/me" }
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": { "method": "POST", "url": "{{base_url}}/api/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "2. Empleos",
+      "item": [
+        {
+          "name": "Listar empleos",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas?page=1&per_page=9" }
+        },
+        {
+          "name": "Buscar por título",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas?titulo=desarrollador" }
+        },
+        {
+          "name": "Filtrar por ubicación",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas?ubicacion=Coracora" }
+        },
+        {
+          "name": "Filtrar por categoría",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas?categoria=Tiempo%20completo" }
+        },
+        {
+          "name": "Empleos recientes",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas/recientes?limite=5" }
+        },
+        {
+          "name": "Detalle de empleo",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas/{{oferta_id}}" }
+        },
+        {
+          "name": "Crear oferta (empleador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) { pm.collectionVariables.set('oferta_id', body.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/ofertas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Desarrollador web\",\n  \"descripcion\": \"Desarrollo de aplicaciones con Laravel.\",\n  \"requisitos\": \"Experiencia de un año en PHP.\",\n  \"lugar\": \"Coracora\",\n  \"tipo_trabajo\": \"Tiempo completo\",\n  \"salario\": 2500,\n  \"fecha_limite\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar oferta (dueño)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/ofertas/{{oferta_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Desarrollador web senior\",\n  \"descripcion\": \"Desarrollo de aplicaciones con Laravel y APIs REST.\",\n  \"requisitos\": \"Experiencia de dos años en PHP.\",\n  \"lugar\": \"Coracora\",\n  \"tipo_trabajo\": \"Tiempo completo\",\n  \"salario\": 3200,\n  \"fecha_limite\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Eliminar oferta (dueño)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/ofertas/{{oferta_id}}" }
+        },
+        {
+          "name": "Aprobar oferta (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/admin/ofertas/{{oferta_id}}/estado",
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"aprobado\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Postulaciones",
+      "item": [
+        {
+          "name": "Postularse (postulante)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) { pm.collectionVariables.set('postulacion_id', body.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/ofertas/{{oferta_id}}/postulaciones",
+            "body": { "mode": "raw", "raw": "{\n  \"mensaje\": \"Tengo experiencia en el puesto y disponibilidad inmediata.\"\n}" }
+          }
+        },
+        {
+          "name": "Mis postulaciones",
+          "request": { "method": "GET", "url": "{{base_url}}/api/postulaciones" }
+        },
+        {
+          "name": "Detalle de postulación",
+          "request": { "method": "GET", "url": "{{base_url}}/api/postulaciones/{{postulacion_id}}" }
+        },
+        {
+          "name": "Postulantes de mi oferta (empleador)",
+          "request": { "method": "GET", "url": "{{base_url}}/api/ofertas/{{oferta_id}}/postulantes" }
+        },
+        {
+          "name": "Cambiar estado (empleador)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/postulaciones/{{postulacion_id}}/estado",
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"revisada\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Oportunidades",
+      "item": [
+        {
+          "name": "Listar oportunidades",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/oportunidades" }
+        },
+        {
+          "name": "Filtrar por tipo",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/oportunidades?tipo=beca" }
+        },
+        {
+          "name": "Oportunidades recientes",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/oportunidades/recientes?limite=5" }
+        },
+        {
+          "name": "Detalle de oportunidad",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/oportunidades/{{oportunidad_id}}" }
+        },
+        {
+          "name": "Crear oportunidad (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) { pm.collectionVariables.set('oportunidad_id', body.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/oportunidades",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Beca de estudios técnicos\",\n  \"tipo\": \"beca\",\n  \"descripcion\": \"Beca completa para estudiar en Coracora.\",\n  \"institucion\": \"Instituto Parinacochas\",\n  \"fecha\": \"2026-12-15\",\n  \"lugar\": \"Coracora\",\n  \"estado\": \"publicado\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Actualizar oportunidad (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/oportunidades/{{oportunidad_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Beca de estudios técnicos 2027\",\n  \"tipo\": \"beca\",\n  \"descripcion\": \"Beca completa para estudiar en Coracora.\",\n  \"institucion\": \"Instituto Parinacochas\",\n  \"fecha\": \"2026-12-15\",\n  \"lugar\": \"Coracora\",\n  \"estado\": \"borrador\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Eliminar oportunidad (admin)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/oportunidades/{{oportunidad_id}}" }
+        }
+      ]
+    },
+    {
+      "name": "5. Publicaciones",
+      "item": [
+        {
+          "name": "Feed unificado",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/publicaciones" }
+        },
+        {
+          "name": "Feed por categoría",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/publicaciones?categoria=beca" }
+        },
+        {
+          "name": "Detalle de publicación",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "url": "{{base_url}}/api/publicaciones/oferta/{{oferta_id}}" }
+        },
+        {
+          "name": "Crear oferta vía publicaciones",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/publicaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo_publicacion\": \"oferta\",\n  \"titulo\": \"Asistente contable\",\n  \"descripcion\": \"Apoyo en el área contable.\",\n  \"requisitos\": \"Estudios en contabilidad.\",\n  \"lugar\": \"Puquio\",\n  \"tipo_trabajo\": \"Medio tiempo\",\n  \"salario\": 1200,\n  \"fecha_limite\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Crear oportunidad vía publicaciones",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/publicaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo_publicacion\": \"oportunidad\",\n  \"titulo\": \"Convocatoria de prácticas\",\n  \"tipo\": \"practica\",\n  \"descripcion\": \"Prácticas remuneradas para estudiantes.\",\n  \"institucion\": \"Municipalidad de Coracora\",\n  \"estado\": \"publicado\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Eliminar oferta vía publicaciones",
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/publicaciones/oferta/{{oferta_id}}" }
+        }
+      ]
+    }
+  ]
+}

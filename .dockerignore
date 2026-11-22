@@ -1,0 +1,43 @@
+# Control de versiones y entorno local (secretos)
+.git
+.gitignore
+.gitattributes
+.env
+.env.*
+!.env.example
+
+# Dependencias instaladas en el host (se instalan dentro de la imagen)
+/vendor
+/node_modules
+
+# Recursos generados (Vite los compila en la etapa frontend)
+/public/build
+/public/hot
+
+# Datos locales: la base SQLite y las imágenes subidas no se hornean
+/database/database.sqlite
+/public/uploads/*
+
+# Documentación y material pesado ajeno al runtime
+/docs
+/temp_edge_login_test
+/scripts
+*.pdf
+*.docx
+
+# Cachés, respaldos locales y registros de desarrollo
+/.backups
+/.phpunit.result.cache
+/.phpunit.cache
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/pail
+/bootstrap/cache/*.php
+
+# Configuración del editor / sistema
+.idea
+.vscode
+.DS_Store
+Thumbs.db
